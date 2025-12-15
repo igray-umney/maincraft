@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Секретная Тропа - Игра</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: #f5f5dc;
+            border: 8px solid #8b4513;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 900px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+
+        .header {
+            background: #d2691e;
+            color: #fff;
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            border: 3px solid #8b4513;
+        }
+
+        .title {
+            font-size: 32px;
+            color: #ff6b00;
+            text-align: center;
+            margin: 15px 0;
+            text-shadow: 3px 3px 0px #000, 
+                         -1px -1px 0px #fff;
+            letter-spacing: 2px;
+        }
+
+        .instructions {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 3px solid #8b4513;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .game-area {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .route-code {
+            background: #deb887;
+            padding: 20px;
+            border-radius: 10px;
+            border: 4px solid #8b4513;
+            min-width: 180px;
+        }
+
+        .route-code h3 {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .route-item {
+            background: #f5deb3;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 5px;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            border: 2px solid #8b4513;
+        }
+
+        .canvas-container {
+            position: relative;
+            background: #fff;
+            border: 4px solid #8b4513;
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        #gameCanvas {
+            border: 2px solid #ccc;
+            cursor: crosshair;
+            display: block;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .result {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 20px;
+            border: 3px solid #8b4513;
+            font-size: 18px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hearts {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .heart {
+            font-size: 40px;
+            cursor: pointer;
+            transition: all 0.3s;
+            filter: grayscale(100%);
+        }
+
+        .heart.filled {
+            filter: grayscale(0%);
+            color: #ff0000;
+        }
+
+        .completion-text {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .game-area {
+                flex-direction: column;
+            }
+            
+            .title {
+                font-size: 24px;
+            }
+            
+            #gameCanvas {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">БЛОК 3: ТВОРЧЕСТВО И ВНИМАНИЕ 🎨</div>
+        
+        <div class="title">СЕКРЕТНАЯ ТРОПА 🧭</div>
+        
+        <div class="instructions">
+            <strong>Задание:</strong> Поставь карандаш на красную точку на сетке. 
+            Рисуй линии по клеточкам точно так, как указывают стрелки. 
+            Узнай, какой предмет спрятан!
+        </div>
+
+        <div class="game-area">
+            <div class="route-code">
+                <h3>📜 Код маршрута</h3>
+                <div class="route-item">3 →</div>
+                <div class="route-item">1 ↓</div>
+                <div class="route-item">1 ←</div>
+                <div class="route-item">3 ↓</div>
+                <div class="route-item">1 ←</div>
+                <div class="route-item">3 ↑</div>
+                <div class="route-item">1 ←</div>
+                <div class="route-item">1 ↑</div>
+            </div>
+
+            <div class="canvas-container">
+                <canvas id="gameCanvas" width="400" height="400"></canvas>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button onclick="startAnimation()">▶ Нарисовать путь</button>
+            <button onclick="resetCanvas()">🔄 Начать заново</button>
+            <button onclick="showAnswer()">💡 Показать ответ</button>
+        </div>
+
+        <div class="result" id="result">
+            <span>Что у тебя получилось? <strong>ЭТО:</strong> <span id="answer">___________</span></span>
+        </div>
+
+        <div class="hearts">
+            <div class="heart" onclick="toggleHeart(this)">♥</div>
+            <div class="heart" onclick="toggleHeart(this)">♥</div>
+            <div class="heart" onclick="toggleHeart(this)">♥</div>
+            <div class="heart" onclick="toggleHeart(this)">♥</div>
+            <div class="heart" onclick="toggleHeart(this)">♥</div>
+        </div>
+        <div class="completion-text">Задание выполнено? Закрась одно сердечко! ❤️</div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const cellSize = 40;
+        const gridSize = 10;
+        
+        // Маршрут
+        const route = [
+            {steps: 3, direction: 'right'},
+            {steps: 1, direction: 'down'},
+            {steps: 1, direction: 'left'},
+            {steps: 3, direction: 'down'},
+            {steps: 1, direction: 'left'},
+            {steps: 3, direction: 'up'},
+            {steps: 1, direction: 'left'},
+            {steps: 1, direction: 'up'}
+        ];
+
+        // Стартовая позиция (красная точка на 3-й строке, 4-й колонке)
+        const startX = 3;
+        const startY = 2;
+
+        function drawGrid() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Рисуем сетку
+            ctx.strokeStyle = '#ddd';
+            ctx.lineWidth = 1;
+            
+            for (let i = 0; i <= gridSize; i++) {
+                // Вертикальные линии
+                ctx.beginPath();
+                ctx.moveTo(i * cellSize, 0);
+                ctx.lineTo(i * cellSize, gridSize * cellSize);
+                ctx.stroke();
+                
+                // Горизонтальные линии
+                ctx.beginPath();
+                ctx.moveTo(0, i * cellSize);
+                ctx.lineTo(gridSize * cellSize, i * cellSize);
+                ctx.stroke();
+            }
+            
+            // Рисуем стартовую точку (красная)
+            ctx.fillStyle = '#ff0000';
+            ctx.beginPath();
+            ctx.arc(startX * cellSize + cellSize/2, startY * cellSize + cellSize/2, 8, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawPath(animated = false) {
+            let x = startX;
+            let y = startY;
+            let index = 0;
+            
+            ctx.strokeStyle = '#0000ff';
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            if (!animated) {
+                ctx.beginPath();
+                ctx.moveTo(x * cellSize + cellSize/2, y * cellSize + cellSize/2);
+                
+                route.forEach(segment => {
+                    for (let i = 0; i < segment.steps; i++) {
+                        switch(segment.direction) {
+                            case 'right': x++; break;
+                            case 'left': x--; break;
+                            case 'down': y++; break;
+                            case 'up': y--; break;
+                        }
+                        ctx.lineTo(x * cellSize + cellSize/2, y * cellSize + cellSize/2);
+                    }
+                });
+                ctx.stroke();
+            } else {
+                // Анимированное рисование
+                let segmentIndex = 0;
+                let stepInSegment = 0;
+                
+                function animateStep() {
+                    if (segmentIndex >= route.length) return;
+                    
+                    const segment = route[segmentIndex];
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(x * cellSize + cellSize/2, y * cellSize + cellSize/2);
+                    
+                    switch(segment.direction) {
+                        case 'right': x++; break;
+                        case 'left': x--; break;
+                        case 'down': y++; break;
+                        case 'up': y--; break;
+                    }
+                    
+                    ctx.lineTo(x * cellSize + cellSize/2, y * cellSize + cellSize/2);
+                    ctx.stroke();
+                    
+                    stepInSegment++;
+                    
+                    if (stepInSegment >= segment.steps) {
+                        stepInSegment = 0;
+                        segmentIndex++;
+                    }
+                    
+                    if (segmentIndex < route.length) {
+                        setTimeout(animateStep, 300);
+                    }
+                }
+                
+                animateStep();
+            }
+        }
+
+        function startAnimation() {
+            resetCanvas();
+            drawPath(true);
+        }
+
+        function resetCanvas() {
+            drawGrid();
+            document.getElementById('answer').textContent = '___________';
+        }
+
+        function showAnswer() {
+            resetCanvas();
+            drawPath(false);
+            document.getElementById('answer').textContent = 'КЛЮЧ 🔑';
+        }
+
+        function toggleHeart(element) {
+            element.classList.toggle('filled');
+        }
+
+        // Инициализация
+        drawGrid();
+    </script>
+</body>
+</html>
